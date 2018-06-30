@@ -10,6 +10,7 @@ const DEFAULT_ICON = "circle";
 const NEW_CONTAINER_ID = "new";
 
 const ONBOARDING_STORAGE_KEY = "onboarding-stage";
+const PRIMARY_CONTAINER_STORAGE_KEY = "primary-container";
 
 // List of panels
 const P_ONBOARDING_1     = "onboarding1";
@@ -151,6 +152,21 @@ const Logic = {
       }
     });
     browser.storage.local.set({achievements});
+  },
+
+  async getPrimaryContainer() {
+    const primaryContainerData = await browser.storage.local.get([PRIMARY_CONTAINER_STORAGE_KEY]);
+    let primaryContainer = primaryContainerData[PRIMARY_CONTAINER_STORAGE_KEY];
+    if (!primaryContainer) {
+      primaryContainer = false;
+    }
+    return primaryContainer;
+  },
+
+  setPrimaryContainer(userContextId) {
+    return browser.storage.local.set({
+      [PRIMARY_CONTAINER_STORAGE_KEY]: userContextId
+    });
   },
 
   setOnboardingStage(stage) {
@@ -990,6 +1006,19 @@ Logic.registerPanel(P_CONTAINER_EDIT, {
     });
   },
 
+  setupPrimaryCheckbox(currentPrimaryContainer, currentUserContextId) {
+    const primaryCheckboxElement = document.getElementById("edit-container-panel-make-primary");
+    primaryCheckboxElement.addEventListener("change", () => {
+      Logic.setPrimaryContainer(currentUserContextId);
+    });
+
+    let checked = false;
+    if (currentPrimaryContainer === currentUserContextId) {
+      checked = true;
+    }
+    primaryCheckboxElement.checked = checked;
+  },
+
   // This method is called when the panel is shown.
   async prepare() {
     const identity = Logic.currentIdentity();
@@ -997,6 +1026,10 @@ Logic.registerPanel(P_CONTAINER_EDIT, {
     const userContextId = Logic.currentUserContextId();
     const assignments = await Logic.getAssignmentObjectByContainer(userContextId);
     this.showAssignedContainers(assignments);
+
+    const primaryContainer = await Logic.getPrimaryContainer();
+    this.setupPrimaryCheckbox(primaryContainer, userContextId);
+
     document.querySelector("#edit-container-panel .panel-footer").hidden = !!userContextId;
 
     document.querySelector("#edit-container-panel-name-input").value = identity.name || "";

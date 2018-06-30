@@ -889,6 +889,16 @@ span ~ .panel-header-text {
   padding-block-end: 6px;
 }
 
+.edit-container-panel legend > input[type="checkbox"] {
+  width: 23px;
+  height: 23px;
+  vertical-align: middle;
+}
+
+.edit-container-panel legend > span {
+  vertical-align: middle;
+}
+
 /* Achievement panel elements */
 .share-ctas {
   padding-block-end: 0.5em;
